@@ -834,8 +834,9 @@ type WorkloadOpts struct {
 	CustomResources map[string]S3ObjectLocation
 
 	// Additional options for job templates.
-	ScheduleExpression string
-	StateMachine       *StateMachineOpts
+	ScheduleExpression         string
+	ScheduleExpressionTimezone string
+	StateMachine               *StateMachineOpts
 
 	// Additional options for request driven web service templates.
 	StartCommand         *string

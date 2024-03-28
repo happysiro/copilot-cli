@@ -25,6 +25,7 @@ import (
 // Parameter logical IDs for a scheduled job
 const (
 	ScheduledJobScheduleParamKey = "Schedule"
+	ScheduledJobTimezoneParamKey = "Timezone"
 )
 
 // ScheduledJob represents the configuration needed to create a Cloudformation stack from a
@@ -176,29 +177,30 @@ func (j *ScheduledJob) Template() (string, error) {
 	}
 
 	content, err := j.parser.ParseScheduledJob(template.WorkloadOpts{
-		SerializedManifest:       string(j.rawManifest),
-		Variables:                convertEnvVars(j.manifest.Variables),
-		Secrets:                  convertSecrets(j.manifest.Secrets),
-		WorkloadType:             manifestinfo.ScheduledJobType,
-		NestedStack:              addonsOutputs,
-		AddonsExtraParams:        addonsParams,
-		Sidecars:                 sidecars,
-		ScheduleExpression:       schedule,
-		StateMachine:             stateMachine,
-		HealthCheck:              convertContainerHealthCheck(j.manifest.ImageConfig.HealthCheck),
-		LogConfig:                convertLogging(j.manifest.Logging),
-		DockerLabels:             j.manifest.ImageConfig.Image.DockerLabels,
-		Storage:                  convertStorageOpts(j.manifest.Name, j.manifest.Storage),
-		Network:                  convertNetworkConfig(j.manifest.Network),
-		EntryPoint:               entrypoint,
-		Command:                  command,
-		DependsOn:                convertDependsOn(j.manifest.ImageConfig.Image.DependsOn),
-		CredentialsParameter:     aws.StringValue(j.manifest.ImageConfig.Image.Credentials),
-		ServiceDiscoveryEndpoint: j.rc.ServiceDiscoveryEndpoint,
-		Publish:                  publishers,
-		Platform:                 convertPlatform(j.manifest.Platform),
-		EnvVersion:               j.rc.EnvVersion,
-		Version:                  j.rc.Version,
+		SerializedManifest:         string(j.rawManifest),
+		Variables:                  convertEnvVars(j.manifest.Variables),
+		Secrets:                    convertSecrets(j.manifest.Secrets),
+		WorkloadType:               manifestinfo.ScheduledJobType,
+		NestedStack:                addonsOutputs,
+		AddonsExtraParams:          addonsParams,
+		Sidecars:                   sidecars,
+		ScheduleExpression:         schedule,
+		ScheduleExpressionTimezone: aws.StringValue(j.manifest.On.Timezone),
+		StateMachine:               stateMachine,
+		HealthCheck:                convertContainerHealthCheck(j.manifest.ImageConfig.HealthCheck),
+		LogConfig:                  convertLogging(j.manifest.Logging),
+		DockerLabels:               j.manifest.ImageConfig.Image.DockerLabels,
+		Storage:                    convertStorageOpts(j.manifest.Name, j.manifest.Storage),
+		Network:                    convertNetworkConfig(j.manifest.Network),
+		EntryPoint:                 entrypoint,
+		Command:                    command,
+		DependsOn:                  convertDependsOn(j.manifest.ImageConfig.Image.DependsOn),
+		CredentialsParameter:       aws.StringValue(j.manifest.ImageConfig.Image.Credentials),
+		ServiceDiscoveryEndpoint:   j.rc.ServiceDiscoveryEndpoint,
+		Publish:                    publishers,
+		Platform:                   convertPlatform(j.manifest.Platform),
+		EnvVersion:                 j.rc.EnvVersion,
+		Version:                    j.rc.Version,
 
 		CustomResources:     crs,
 		PermissionsBoundary: j.permBound,
@@ -227,6 +229,10 @@ func (j *ScheduledJob) Parameters() ([]*cloudformation.Parameter, error) {
 		{
 			ParameterKey:   aws.String(ScheduledJobScheduleParamKey),
 			ParameterValue: aws.String(schedule),
+		},
+		{
+			ParameterKey:   aws.String(ScheduledJobTimezoneParamKey),
+			ParameterValue: j.manifest.On.Timezone,
 		},
 	}...), nil
 }

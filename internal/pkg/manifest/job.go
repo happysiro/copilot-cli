@@ -46,6 +46,7 @@ type ScheduledJobConfig struct {
 // JobTriggerConfig represents the configuration for the event that triggers the job.
 type JobTriggerConfig struct {
 	Schedule *string `yaml:"schedule"`
+	Timezone *string `yaml:"timezone"`
 }
 
 // JobFailureHandlerConfig represents the error handling configuration for the job.
